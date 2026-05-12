@@ -15,10 +15,10 @@
                 <span class="logo-scout">Scout</span><span class="logo-cloud">Cloud</span>
             </a>
             <ul class="nav-links">
-                <li><a href="#scores" class="active">Scores</a></li>
-                <li><a href="#players">Players</a></li>
-                <li><a href="#analytics">Analytics</a></li>
-                <li><a href="#about">About</a></li>
+                <li><a href="#scores" data-section="scores" class="active">Scores</a></li>
+                <li><a href="#players" data-section="players">Players</a></li>
+                <li><a href="#analytics" data-section="analytics">Analytics</a></li>
+                <li><a href="#about" data-section="about">About</a></li>
             </ul>
             <button class="sign-in-btn" data-cognito-url="{{ cognito_hosted_ui_url }}">Sign in</button>
         </div>
@@ -197,6 +197,30 @@
                         <div class="alert-row"><span class="alert-dot dot-milestone"></span><span>Brunson 30+ pts - Knicks vs Celtics</span></div>
                         <div class="alert-row"><span class="alert-dot dot-live"></span><span>Curry shooting 6-for-8 from 3 - live now</span></div>
                         <div class="alert-row"><span class="alert-dot dot-report"></span><span>Weekly shot chart export ready</span></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="about" class="section">
+            <div class="section-header">
+                <h2>About</h2>
+                <span class="badge badge-active">v1.0.0</span>
+            </div>
+            <div class="about-card">
+                <p class="about-lead">ScoutCloud is a real-time NBA intelligence platform built on AWS - live scores, player statistics, and front-office analytics behind a Cognito-gated tier.</p>
+                <div class="about-grid">
+                    <div class="about-block">
+                        <div class="about-block-title">Free tier</div>
+                        <div class="about-block-body">Live scores updated every 5 minutes via Lambda + DynamoDB. Player statistics from RDS PostgreSQL. Photos auto-tagged with Rekognition.</div>
+                    </div>
+                    <div class="about-block">
+                        <div class="about-block-title">Front-office tier &middot; $499/mo</div>
+                        <div class="about-block-body">Shot charts by defensive matchup, 30+ SNS alert types, sentiment analysis via Comprehend, JWT auth via Cognito.</div>
+                    </div>
+                    <div class="about-block">
+                        <div class="about-block-title">Stack</div>
+                        <div class="about-block-body">ECS Fargate, Lambda, RDS, DynamoDB, CloudFront, ALB, Cognito, KMS, Secrets Manager, EKS, Prometheus, Grafana.</div>
                     </div>
                 </div>
             </div>

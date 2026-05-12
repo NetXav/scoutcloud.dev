@@ -173,12 +173,60 @@ function startPolling() {
     setInterval(fetchScores, 30000);
 }
 
+function initScrollSpy() {
+    const links = document.querySelectorAll('.nav-links a[data-section]');
+    if (!links.length || !('IntersectionObserver' in window)) return;
+
+    const linkBySection = {};
+    links.forEach(a => { linkBySection[a.dataset.section] = a; });
+
+    const setActive = (sectionId) => {
+        links.forEach(a => a.classList.toggle('active', a.dataset.section === sectionId));
+    };
+
+    // Track which sections are currently visible; pick the topmost.
+    const visible = new Map();
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(e => {
+            if (e.isIntersecting) visible.set(e.target.id, e.boundingClientRect.top);
+            else visible.delete(e.target.id);
+        });
+        if (visible.size > 0) {
+            // The section closest to the top of the viewport wins.
+            const top = [...visible.entries()].sort((a, b) => a[1] - b[1])[0][0];
+            setActive(top);
+        }
+    }, {
+        // Trigger when a section's center crosses the upper third of the viewport.
+        rootMargin: '-30% 0px -55% 0px',
+        threshold: 0
+    });
+
+    Object.keys(linkBySection).forEach(id => {
+        const el = document.getElementById(id);
+        if (el) observer.observe(el);
+    });
+
+    // Click-to-scroll smooth behavior + immediate active state.
+    links.forEach(a => {
+        a.addEventListener('click', (ev) => {
+            const target = document.getElementById(a.dataset.section);
+            if (!target) return;
+            ev.preventDefault();
+            setActive(a.dataset.section);
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            history.replaceState({}, '', '#' + a.dataset.section);
+        });
+    });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     handleCognitoCallback();
     fetchScores();
     fetchPlayers();
     checkStoredToken();
     startPolling();
+    initScrollSpy();
 
     const signinBtn = document.querySelector('.sign-in-btn');
     if (signinBtn) {
