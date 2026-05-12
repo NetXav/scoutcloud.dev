@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scoutcloud-app
+  namespace: scoutcloud
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: scoutcloud
+  template:
+    metadata:
+      labels:
+        app: scoutcloud
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: /metrics
+        prometheus.io/port: "80"
+    spec:
+      containers:
+        - name: scoutcloud-app
+          image: YOUR_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/scoutcloud-app:latest
+          ports:
+            - containerPort: 80
+          envFrom:
+            - configMapRef:
+                name: scoutcloud-config
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: scoutcloud-secrets
+                  key: database-url
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 10

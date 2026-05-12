@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="scoutcloud-domain" content="scoutcloud.dev">
+    <meta name="cognito-enabled" content="{{ cognito_enabled | lower }}">
+    <title>ScoutCloud - NBA Intelligence Platform</title>
+    <link rel="stylesheet" href="/static/css/main.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-inner">
+            <a href="/" class="logo">
+                <span class="logo-scout">Scout</span><span class="logo-cloud">Cloud</span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="#scores" class="active">Scores</a></li>
+                <li><a href="#players">Players</a></li>
+                <li><a href="#analytics">Analytics</a></li>
+                <li><a href="#about">About</a></li>
+            </ul>
+            <button class="sign-in-btn" data-cognito-url="{{ cognito_hosted_ui_url }}">Sign in</button>
+        </div>
+    </nav>
+
+    <div class="ticker">
+        <div class="ticker-track">
+            <span class="ticker-item"><span class="dot"></span>Knicks @ Celtics - Scheduled</span>
+            <span class="ticker-item"><span class="dot"></span>Lakers @ Warriors - Scheduled</span>
+            <span class="ticker-item"><span class="dot"></span>Bucks @ Heat - Scheduled</span>
+            <span class="ticker-item"><span class="dot"></span>Live scores via Lambda + DynamoDB</span>
+            <span class="ticker-item"><span class="dot"></span>Updated every 5 min</span>
+            <!-- duplicate for seamless scroll -->
+            <span class="ticker-item"><span class="dot"></span>Knicks @ Celtics - Scheduled</span>
+            <span class="ticker-item"><span class="dot"></span>Lakers @ Warriors - Scheduled</span>
+            <span class="ticker-item"><span class="dot"></span>Bucks @ Heat - Scheduled</span>
+            <span class="ticker-item"><span class="dot"></span>Live scores via Lambda + DynamoDB</span>
+            <span class="ticker-item"><span class="dot"></span>Updated every 5 min</span>
+        </div>
+    </div>
+
+    <main class="page-body">
+        <section id="scores" class="section">
+            <div class="section-header">
+                <h2>Live scores</h2>
+                {% if dynamodb_connected %}
+                <span class="badge badge-live">&#9679; Updated now &middot; Lambda</span>
+                {% else %}
+                <span class="badge badge-placeholder">Demo data &middot; Connect Lambda in Ch8</span>
+                {% endif %}
+            </div>
+            <div class="score-grid" id="score-grid">
+                <article class="score-card" data-game-id="NYK-BOS">
+                    <div class="accent accent-scheduled"></div>
+                    <div class="status status-scheduled">Scheduled</div>
+                    <div class="teams">
+                        <div class="team">
+                            <div class="team-name">Knicks</div>
+                            <div class="team-score">0</div>
+                        </div>
+                        <div class="dash">-</div>
+                        <div class="team">
+                            <div class="team-name">Celtics</div>
+                            <div class="team-score">0</div>
+                        </div>
+                    </div>
+                    <div class="venue">Madison Square Garden</div>
+                </article>
+                <article class="score-card" data-game-id="LAL-GSW">
+                    <div class="accent accent-scheduled"></div>
+                    <div class="status status-scheduled">Scheduled</div>
+                    <div class="teams">
+                        <div class="team">
+                            <div class="team-name">Lakers</div>
+                            <div class="team-score">0</div>
+                        </div>
+                        <div class="dash">-</div>
+                        <div class="team">
+                            <div class="team-name">Warriors</div>
+                            <div class="team-score">0</div>
+                        </div>
+                    </div>
+                    <div class="venue">Crypto.com Arena</div>
+                </article>
+                <article class="score-card" data-game-id="MIL-MIA">
+                    <div class="accent accent-scheduled"></div>
+                    <div class="status status-scheduled">Scheduled</div>
+                    <div class="teams">
+                        <div class="team">
+                            <div class="team-name">Bucks</div>
+                            <div class="team-score">0</div>
+                        </div>
+                        <div class="dash">-</div>
+                        <div class="team">
+                            <div class="team-name">Heat</div>
+                            <div class="team-score">0</div>
+                        </div>
+                    </div>
+                    <div class="venue">Fiserv Forum</div>
+                </article>
+            </div>
+        </section>
+
+        <section id="players" class="section">
+            <div class="section-header">
+                <h2>Player statistics</h2>
+                {% if database_connected %}
+                <span class="badge badge-rds">RDS PostgreSQL</span>
+                {% else %}
+                <span class="badge badge-placeholder">Connect RDS in Chapter 7</span>
+                {% endif %}
+            </div>
+            <div class="player-table-wrap">
+                <table class="player-table">
+                    <thead>
+                        <tr>
+                            <th class="col-player">Player</th>
+                            <th class="col-stat">PPG</th>
+                            <th class="col-stat">APG</th>
+                            <th class="col-stat">RPG</th>
+                            <th class="col-stat">FG%</th>
+                        </tr>
+                    </thead>
+                    <tbody id="player-tbody">
+                        <tr>
+                            <td class="player-cell"><div class="player-name">--</div><div class="player-team">--</div></td>
+                            <td class="stat-cell">--</td>
+                            <td class="stat-cell">--</td>
+                            <td class="stat-cell">--</td>
+                            <td class="stat-cell">--</td>
+                        </tr>
+                        <tr>
+                            <td class="player-cell"><div class="player-name">--</div><div class="player-team">--</div></td>
+                            <td class="stat-cell">--</td>
+                            <td class="stat-cell">--</td>
+                            <td class="stat-cell">--</td>
+                            <td class="stat-cell">--</td>
+                        </tr>
+                        <tr>
+                            <td class="player-cell"><div class="player-name">--</div><div class="player-team">--</div></td>
+                            <td class="stat-cell">--</td>
+                            <td class="stat-cell">--</td>
+                            <td class="stat-cell">--</td>
+                            <td class="stat-cell">--</td>
+                        </tr>
+                        <tr>
+                            <td class="player-cell"><div class="player-name">--</div><div class="player-team">--</div></td>
+                            <td class="stat-cell">--</td>
+                            <td class="stat-cell">--</td>
+                            <td class="stat-cell">--</td>
+                            <td class="stat-cell">--</td>
+                        </tr>
+                        {% if not database_connected %}
+                        <tr class="placeholder-notice">
+                            <td colspan="5">Connect RDS in Chapter 7 to see real player data</td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="analytics" class="section">
+            <div class="section-header">
+                <h2>Advanced analytics</h2>
+                <span class="badge badge-locked">Premium &middot; $499/month</span>
+            </div>
+
+            <div class="analytics-locked">
+                <i class="lock-icon">&#128274;</i>
+                <h3 class="lock-title">Front office analytics</h3>
+                <p class="lock-subtitle">Shot charts by defensive matchup, 30+ alert types, player sentiment analysis, and AI photo tagging.</p>
+                <div class="feature-grid">
+                    <div class="feature"><span class="feature-icon">&#128202;</span>Shot charts by zone and matchup</div>
+                    <div class="feature"><span class="feature-icon">&#128276;</span>30+ real-time score alerts</div>
+                    <div class="feature"><span class="feature-icon">&#128512;</span>Fan sentiment analysis</div>
+                    <div class="feature"><span class="feature-icon">&#128247;</span>AI photo tagging &middot; Rekognition</div>
+                </div>
+                <button class="lock-cta">Sign in with your front-office account</button>
+            </div>
+            <div class="analytics-unlocked" id="analytics-unlocked" style="display: none;">
+                <div class="unlocked-header">
+                    <div class="unlocked-title">Brunson shot chart - vs Celtics defense</div>
+                    <div class="unlocked-email"></div>
+                </div>
+                <div class="unlocked-body">
+                    <div class="unlocked-label">Shot efficiency by zone &middot; last 10 games</div>
+                    <div class="shot-grid">
+                        <div class="shot-cell"><div class="shot-pct hot">61.3%</div><div class="shot-label">Paint</div></div>
+                        <div class="shot-cell"><div class="shot-pct neutral">48.3%</div><div class="shot-label">Mid-range</div></div>
+                        <div class="shot-cell"><div class="shot-pct cold">34.0%</div><div class="shot-label">Left corner 3</div></div>
+                        <div class="shot-cell"><div class="shot-pct hot">54.5%</div><div class="shot-label">Top of key 3</div></div>
+                    </div>
+                    <div class="alert-list">
+                        <div class="alert-label">Recent alerts &middot; via SNS</div>
+                        <div class="alert-row"><span class="alert-dot dot-milestone"></span><span>Brunson 30+ pts - Knicks vs Celtics</span></div>
+                        <div class="alert-row"><span class="alert-dot dot-live"></span><span>Curry shooting 6-for-8 from 3 - live now</span></div>
+                        <div class="alert-row"><span class="alert-dot dot-report"></span><span>Weekly shot chart export ready</span></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-left">
+            <div>Instance: {{ instance_id }} &middot; {{ aws_region }}</div>
+            <div>Terraform &middot; GitHub Actions</div>
+        </div>
+        <div class="footer-right">
+            <span class="footer-dot"></span>CloudFront: Hit &middot; scoutcloud.dev
+        </div>
+    </footer>
+
+    <script src="/static/js/scores.js"></script>
+</body>
+</html>

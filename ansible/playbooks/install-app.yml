@@ -1,0 +1,117 @@
+---
+- name: Install ScoutCloud application on EC2
+  hosts: all
+  become: true
+  vars:
+    github_repo: "https://github.com/NetXav/scoutcloud.dev.git"
+    app_dir: /opt/scoutcloud
+    app_user: scoutcloud
+    database_url: "placeholder"
+    dynamodb_table: "placeholder"
+    aws_region: "us-east-1"
+
+  tasks:
+    - name: Install OS packages
+      ansible.builtin.dnf:
+        name:
+          - git
+          - python3
+          - python3-pip
+          - libpq-devel
+          - curl
+        state: present
+
+    - name: Create system user for the app
+      ansible.builtin.user:
+        name: "{{ app_user }}"
+        system: true
+        shell: /sbin/nologin
+        home: "{{ app_dir }}"
+        create_home: false
+
+    - name: Clone or update the ScoutCloud fork
+      ansible.builtin.git:
+        repo: "{{ github_repo }}"
+        dest: "{{ app_dir }}"
+        version: main
+        force: true
+
+    - name: Set ownership on app directory
+      ansible.builtin.file:
+        path: "{{ app_dir }}"
+        owner: "{{ app_user }}"
+        group: "{{ app_user }}"
+        recurse: true
+
+    - name: Install Python dependencies
+      ansible.builtin.pip:
+        requirements: "{{ app_dir }}/src/app/requirements.txt"
+        executable: pip3
+
+    - name: Template environment file
+      ansible.builtin.copy:
+        dest: /etc/scoutcloud.env
+        owner: "{{ app_user }}"
+        group: "{{ app_user }}"
+        mode: "0640"
+        content: |
+          DATABASE_URL={{ database_url }}
+          DYNAMODB_TABLE={{ dynamodb_table }}
+          AWS_REGION={{ aws_region }}
+
+    - name: Install systemd unit
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/scoutcloud.service
+        owner: root
+        group: root
+        mode: "0644"
+        content: |
+          [Unit]
+          Description=ScoutCloud NBA Intelligence Platform
+          After=network-online.target
+
+          [Service]
+          Type=simple
+          User={{ app_user }}
+          WorkingDirectory={{ app_dir }}/src/app
+          EnvironmentFile=/etc/scoutcloud.env
+          ExecStart=/usr/local/bin/gunicorn app:app -b 0.0.0.0:80 -w 2
+          Restart=always
+          RestartSec=5
+
+          [Install]
+          WantedBy=multi-user.target
+      notify:
+        - reload systemd
+        - restart scoutcloud
+
+    - name: Ensure scoutcloud service is enabled and running
+      ansible.builtin.systemd:
+        name: scoutcloud
+        enabled: true
+        state: started
+        daemon_reload: true
+
+    - name: Verify /health endpoint
+      ansible.builtin.uri:
+        url: "http://localhost/health"
+        return_content: true
+        status_code: 200
+      register: health_check
+      retries: 6
+      delay: 5
+      until: health_check.status == 200
+
+    - name: Print health response
+      ansible.builtin.debug:
+        var: health_check.json
+
+  handlers:
+    - name: reload systemd
+      ansible.builtin.systemd:
+        daemon_reload: true
+
+    - name: restart scoutcloud
+      ansible.builtin.systemd:
+        name: scoutcloud
+        state: restarted

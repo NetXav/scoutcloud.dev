@@ -1,0 +1,33 @@
+version: '3.8'
+services:
+  app:
+    build: .
+    ports: ["8080:80"]
+    environment:
+      DATABASE_URL:         ${DATABASE_URL:-placeholder}
+      DYNAMODB_TABLE:       ${DYNAMODB_TABLE:-placeholder}
+      COGNITO_USER_POOL_ID: ${COGNITO_USER_POOL_ID:-}
+      COGNITO_CLIENT_ID:    ${COGNITO_CLIENT_ID:-}
+      AWS_REGION:           ${AWS_REGION:-us-east-1}
+      SECRET_ARN:           ${SECRET_ARN:-}
+    volumes:
+      - ~/.aws:/root/.aws:ro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports: ["9090:9090"]
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    depends_on: [app]
+
+  grafana:
+    image: grafana/grafana:latest
+    ports: ["3000:3000"]
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: scoutcloud2026
+    depends_on: [prometheus]

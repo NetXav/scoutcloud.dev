@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: scoutcloud-config
+  namespace: scoutcloud
+data:
+  DYNAMODB_TABLE: "scoutcloud-live-scores"
+  AWS_REGION: "us-east-1"
+  COGNITO_USER_POOL_ID: ""
+  COGNITO_CLIENT_ID: ""
+  # Cognito callback URLs - production domain enforced
+  COGNITO_CALLBACK_URL: "https://scoutcloud.dev"
+  COGNITO_LOGOUT_URL: "https://scoutcloud.dev"

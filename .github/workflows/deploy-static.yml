@@ -1,0 +1,50 @@
+name: Deploy Static Assets
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/app/static/**'
+      - '.github/workflows/deploy-static.yml'
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: us-east-1
+  S3_BUCKET: scoutcloud-static
+  CF_DISTRIBUTION_ID: ""
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+        continue-on-error: true
+
+      - name: Sync static assets to S3
+        run: |
+          if [ -z "${{ secrets.AWS_OIDC_ROLE_ARN }}" ]; then
+            echo "AWS_OIDC_ROLE_ARN not set - skipping S3 sync (deployed in Chapter 6+)"
+            exit 0
+          fi
+          aws s3 sync src/app/static/ s3://${S3_BUCKET}/static/ --delete
+
+      - name: Invalidate CloudFront cache
+        run: |
+          if [ -z "${CF_DISTRIBUTION_ID}" ]; then
+            echo "CloudFront distribution not yet deployed - skipping invalidation"
+            exit 0
+          fi
+          aws cloudfront create-invalidation \
+            --distribution-id "${CF_DISTRIBUTION_ID}" \
+            --paths "/static/*"

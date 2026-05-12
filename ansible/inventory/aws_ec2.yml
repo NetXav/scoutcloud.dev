@@ -1,0 +1,18 @@
+---
+plugin: amazon.aws.aws_ec2
+regions:
+  - us-east-1
+filters:
+  tag:Project: scoutcloud
+  instance-state-name: running
+keyed_groups:
+  - key: tags.Environment
+    prefix: env
+  - key: tags.Chapter
+    prefix: chapter
+hostnames:
+  - tag:Name
+  - public-ip-address
+compose:
+  ansible_host: public_ip_address
+  ansible_user: "'ec2-user'"
